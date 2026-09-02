@@ -17,20 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Switch development packages
-        run: |
-          dkp-pacman -Syy --noconfirm
-          dkp-pacman -S --needed --noconfirm switch-dev
-
-      - name: Verify Switch environment
-        run: |
-          echo "DEVKITPRO=$DEVKITPRO"
-          test -f "$DEVKITPRO/libnx/include/switch.h"
-          echo "switch.h encontrado!"
-
-      - name: Clean
-        run: make clean || true
-
       - name: Build NRO
         run: make -j2
 
