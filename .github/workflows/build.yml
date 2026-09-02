@@ -19,7 +19,6 @@ jobs:
 
       - name: Install Switch development packages
         run: |
-          dkp-pacman -Syu --noconfirm
           dkp-pacman -S --needed --noconfirm switch-dev
 
       - name: Build NRO
