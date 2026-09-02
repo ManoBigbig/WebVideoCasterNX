@@ -1,0 +1,33 @@
+name: Build WebVideoCasterNX
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Switch development packages
+        run: |
+          dkp-pacman -Syu --noconfirm
+          dkp-pacman -S --needed --noconfirm switch-dev
+
+      - name: Build NRO
+        run: make -j2
+
+      - name: Upload NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: WebVideoCasterNX-v0.1
+          path: |
+            WebVideoCasterNX.nro
+            WebVideoCasterNX.nacp
+          if-no-files-found: error
