@@ -2,48 +2,30 @@
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
-
-TOPDIR ?= $(CURDIR)
-
 include $(DEVKITPRO)/libnx/switch_rules
 
 #---------------------------------------------------------------------------------
 # Project settings
 #---------------------------------------------------------------------------------
 
-TARGET := WebVideoCasterNX
-BUILD := build
-SOURCES := source
-DATA :=
-INCLUDES :=
-
-APP_TITLE := WebVideoCasterNX
-APP_AUTHOR := ManoBigbig
-APP_VERSION := 0.1
-
-# No icon for now
-NO_ICON := 1
+TARGET      := WebVideoCasterNX
+BUILD       := build
+SOURCES     := source
+DATA        :=
+INCLUDES    :=
 
 #---------------------------------------------------------------------------------
 # Compiler options
 #---------------------------------------------------------------------------------
 
-ARCH := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+ARCH := -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections \
-	$(ARCH) $(DEFINES)
-
+CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections $(ARCH)
 CFLAGS += $(INCLUDE) -D__SWITCH__
 
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 
 ASFLAGS := -g $(ARCH)
-
-LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) \
-	-Wl,-Map,$(notdir $*.map)
 
 LIBS := -lnx
 
@@ -63,7 +45,7 @@ export OUTPUT := $(CURDIR)/$(TARGET)
 export TOPDIR := $(CURDIR)
 
 export VPATH := $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-	$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+                $(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR := $(CURDIR)/$(BUILD)
 
@@ -85,16 +67,12 @@ export OFILES := $(OFILES_BIN) $(OFILES_SRC)
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
 
 export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-	$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-	-I$(CURDIR)/$(BUILD)
+                  $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+                  -I$(CURDIR)/$(BUILD)
 
 export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: all clean
-
-#---------------------------------------------------------------------------------
-# Main build target
-#---------------------------------------------------------------------------------
 
 all: $(BUILD)
 
@@ -102,15 +80,10 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-#---------------------------------------------------------------------------------
-# Clean
-#---------------------------------------------------------------------------------
-
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
 
-#---------------------------------------------------------------------------------
 else
 
 DEPENDS := $(OFILES:.o=.d)
@@ -125,18 +98,7 @@ $(OUTPUT).elf : $(OFILES)
 
 $(OFILES_SRC) : $(HFILES)
 
-#---------------------------------------------------------------------------------
-# Binary files
-#---------------------------------------------------------------------------------
-
-%_bin.h %.bin.o : %.bin
-	@echo $(notdir $<)
-	@$(bin2o)
-
 -include $(DEPENDS)
 
-#---------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------
-
-
