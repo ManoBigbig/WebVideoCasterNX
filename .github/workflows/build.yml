@@ -1,6 +1,9 @@
 name: Build WebVideoCasterNX
 
 on:
+ame: Build WebVideoCasterNX
+
+on:
   workflow_dispatch:
   push:
     branches: [ main ]
