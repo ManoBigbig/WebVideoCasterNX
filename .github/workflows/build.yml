@@ -19,16 +19,27 @@ jobs:
 
       - name: Install Switch development packages
         run: |
-          dkp-pacman -S --noconfirm switch-dev
+          dkp-pacman -Syy --noconfirm
+          dkp-pacman -S --needed --noconfirm switch-dev
 
-      - name: Verify libnx
+      - name: Verify Switch environment
         run: |
           echo "DEVKITPRO=$DEVKITPRO"
-          ls -la $DEVKITPRO/libnx
-          ls -la $DEVKITPRO/libnx/include/switch.h
+          echo "DEVKITA64=$DEVKITA64"
+          test -f "$DEVKITPRO/libnx/include/switch.h"
+          echo "switch.h encontrado!"
+          ls -l "$DEVKITPRO/libnx/include/switch.h"
+
+      - name: Clean
+        run: make clean || true
 
       - name: Build NRO
         run: make -j2
+
+      - name: Verify output
+        run: |
+          ls -lh WebVideoCasterNX.nro
+          ls -lh WebVideoCasterNX.nacp
 
       - name: Upload NRO
         uses: actions/upload-artifact@v4

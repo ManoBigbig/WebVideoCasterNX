@@ -1,29 +1,58 @@
+#---------------------------------------------------------------------------------
+# devkitPro Nintendo Switch Makefile
+#---------------------------------------------------------------------------------
+
 ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+$(error "Please set DEVKITPRO in your environment.")
 endif
 
 TOPDIR ?= $(CURDIR)
 
 include $(DEVKITPRO)/libnx/switch_rules
 
-TARGET := WebVideoCasterNX
-BUILD := build
-SOURCES := source
-DATA :=
-INCLUDES :=
+#---------------------------------------------------------------------------------
+# Project settings
+#---------------------------------------------------------------------------------
 
-APP_TITLE := WebVideoCasterNX
-APP_AUTHOR := ManoBigbig
+TARGET      := WebVideoCasterNX
+BUILD       := build
+SOURCES     := source
+DATA        :=
+INCLUDES    :=
+
+APP_TITLE   := WebVideoCasterNX
+APP_AUTHOR  := ManoBigbig
 APP_VERSION := 0.1
 
-CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections
-CFLAGS += -D__SWITCH__
+#---------------------------------------------------------------------------------
+# Compiler options
+#---------------------------------------------------------------------------------
+
+ARCH := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+
+CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections \
+          $(ARCH) $(DEFINES)
+
+CFLAGS += $(INCLUDE) -D__SWITCH__
 
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 
+ASFLAGS := -g $(ARCH)
+
+LDFLAGS := -specs=$(DEVKITPRO)/libnx/switch.specs \
+           -g $(ARCH)
+
 LIBS := -lnx
 
+#---------------------------------------------------------------------------------
+# Libraries
+#---------------------------------------------------------------------------------
+
 LIBDIRS := $(PORTLIBS) $(LIBNX)
+
+#---------------------------------------------------------------------------------
+# Build system
+#---------------------------------------------------------------------------------
 
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 
@@ -47,7 +76,10 @@ export LD := $(CXX)
 endif
 
 export OFILES_BIN := $(addsuffix .o,$(BINFILES))
-export OFILES_SRC := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES_SRC := $(CPPFILES:.cpp=.o) \
+                     $(CFILES:.c=.o) \
+                     $(SFILES:.s=.o)
+
 export OFILES := $(OFILES_BIN) $(OFILES_SRC)
 
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
@@ -60,30 +92,48 @@ export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 .PHONY: all clean
 
+#---------------------------------------------------------------------------------
+# Main target
+#---------------------------------------------------------------------------------
+
 all: $(BUILD)
 
 $(BUILD):
-	@[ -d $@ ] || mkdir -p $@
+	@mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
+#---------------------------------------------------------------------------------
+# Clean
+#---------------------------------------------------------------------------------
 
+clean:
+	@echo "Cleaning..."
+	@rm -rf $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
+
+#---------------------------------------------------------------------------------
 else
 
 DEPENDS := $(OFILES:.o=.d)
 
-$(OUTPUT).nro : $(OUTPUT).elf
+#---------------------------------------------------------------------------------
+# Link
+#---------------------------------------------------------------------------------
 
-$(OUTPUT).elf : $(OFILES)
+$(OUTPUT).nro: $(OUTPUT).elf
 
-$(OFILES_SRC) : $(HFILES)
+$(OUTPUT).elf: $(OFILES)
 
-%_bin.h %_bin.o : %.bin
+$(OFILES_SRC): $(HFILES)
+
+#---------------------------------------------------------------------------------
+# Binary files
+#---------------------------------------------------------------------------------
+
+%_bin.h %_bin.o: %.bin
 	@echo $(notdir $<)
 	@$(bin2o)
 
 -include $(DEPENDS)
 
+#---------------------------------------------------------------------------------
 endif
