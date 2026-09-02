@@ -1,16 +1,5 @@
-#---------------------------------------------------------------------------------
 .SUFFIXES:
-#---------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
-
-TOPDIR ?= $(CURDIR)
-
 include $(DEVKITPRO)/libnx/switch_rules
-
-#---------------------------------------------------------------------------------
 
 TARGET := WebVideoCasterNX
 BUILD := build
@@ -22,13 +11,9 @@ APP_TITLE := WebVideoCasterNX
 APP_AUTHOR := ManoBigbig
 APP_VERSION := 0.1
 
-NO_ICON := 1
-
-#---------------------------------------------------------------------------------
-
 ARCH := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections $(ARCH) $(DEFINES)
+CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections $(ARCH)
 CFLAGS += $(INCLUDE) -D__SWITCH__
 
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
@@ -36,10 +21,7 @@ CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 ASFLAGS := -g $(ARCH)
 
 LIBS := -lnx
-
 LIBDIRS := $(PORTLIBS) $(LIBNX)
-
-#---------------------------------------------------------------------------------
 
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 
@@ -86,8 +68,6 @@ clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
 
-#---------------------------------------------------------------------------------
-
 else
 
 DEPENDS := $(OFILES:.o=.d)
@@ -105,4 +85,3 @@ $(OFILES_SRC) : $(HFILES)
 -include $(DEPENDS)
 
 endif
-#---------------------------------------------------------------------------------
