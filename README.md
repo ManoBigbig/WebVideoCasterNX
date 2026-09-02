@@ -1,42 +1,43 @@
-# WebVideoCasterNX v0.1
+# WebVideoCasterNX
 
-Primeira build experimental do projeto WebVideoCasterNX.
+Homebrew para Nintendo Switch que tem como objetivo funcionar como um receiver
+nativo para o Web Video Caster.
 
-## Objetivo desta versão
+## Status
 
-Esta versão é propositalmente mínima. Ela:
+🚧 Projeto experimental / em desenvolvimento.
 
-- inicia como homebrew `.nro`;
-- inicializa a interface de console;
-- inicializa o serviço de rede do Switch;
-- informa na tela se a inicialização de rede foi bem-sucedida;
-- fica aguardando enquanto preparamos a implementação do protocolo do Web Video Caster.
+O projeto ainda não está funcional. O build do NRO é possível, porém ainda existem
+problemas durante a execução no Nintendo Switch.
 
-**Importante:** esta versão ainda NÃO implementa o protocolo do Web Video Caster e, portanto,
-não deve ser esperada como um receiver funcional do WVC ainda. O teste serve para validar
-que o ambiente de compilação e a execução do homebrew no Switch estão funcionando.
+## Procurando colaboradores
 
-## Compilação
+No momento, o desenvolvimento está pausado por falta de conhecimento/tempo para
+continuar a implementação.
 
-Requer um ambiente com devkitPro/devkitA64/libnx.
+Se você tiver conhecimento em:
 
-Na pasta do projeto:
+- Nintendo Switch homebrew / libnx
+- C/C++
+- Protocolos de streaming
+- Web Video Caster
+- HTTP / WebSocket
+- Reprodução e decodificação de vídeo
 
-    make
+sinta-se à vontade para pegar o código, estudar, corrigir ou continuar o projeto.
 
-O resultado esperado é:
+### Objetivo do projeto
 
-    WebVideoCasterNX.nro
+A ideia é criar um receiver nativo para Nintendo Switch capaz de receber conteúdo
+enviado pelo Web Video Caster, evitando a necessidade de utilizar o navegador
+oculto do Switch.
 
-## Instalação no Switch
+O projeto é aberto e qualquer pessoa pode contribuir, modificar e continuar o
+desenvolvimento de acordo com a licença definida neste repositório.
 
-Copie o `.nro` para:
+## Contribuições
 
-    /switch/WebVideoCasterNX/WebVideoCasterNX.nro
+Pull requests, issues, correções e melhorias são bem-vindos.
 
-e abra pelo seu menu de homebrew.
-
-## Próxima etapa
-
-Depois de confirmar que esta build abre no Switch, a próxima etapa é implementar
-descoberta, pareamento/handshake e transporte usados pelo Web Video Caster.
+Se você continuar este projeto ou conseguir fazê-lo funcionar, seria muito legal
+compartilhar as alterações aqui para que outras pessoas também possam aproveitar.
