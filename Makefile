@@ -1,6 +1,4 @@
-#---------------------------------------------------------------------------------
-# devkitPro Nintendo Switch Makefile
-#---------------------------------------------------------------------------------
+.SUFFIXES:
 
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment.")
@@ -10,49 +8,59 @@ TOPDIR ?= $(CURDIR)
 
 include $(DEVKITPRO)/libnx/switch_rules
 
-#---------------------------------------------------------------------------------
-# Project settings
-#---------------------------------------------------------------------------------
+TARGET := WebVideoCasterNX
+BUILD := build
+SOURCES := source
+DATA := data
+INCLUDES :=
 
-TARGET      := WebVideoCasterNX
-BUILD       := build
-SOURCES     := source
-DATA        :=
-INCLUDES    :=
-
-APP_TITLE   := WebVideoCasterNX
-APP_AUTHOR  := ManoBigbig
+APP_TITLE := WebVideoCasterNX
+APP_AUTHOR := ManoBigbig
 APP_VERSION := 0.1
-
-#---------------------------------------------------------------------------------
-# Compiler options
-#---------------------------------------------------------------------------------
 
 ARCH := -march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS := -g -Wall -O2 -ffunction-sections -fdata-sections \
-          $(ARCH) $(DEFINES)
+CFLAGS := -g -Wall -O2 -ffunction-sections \
+	$(ARCH) $(DEFINES)
 
 CFLAGS += $(INCLUDE) -D__SWITCH__
 
-CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
+CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS := -g $(ARCH)
 
-LDFLAGS := -specs=$(DEVKITPRO)/libnx/switch.specs \
-           -g $(ARCH)
+LDFLAGS = -specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) \
+	-Wl,-Map,$(notdir $*.map)
 
 LIBS := -lnx
 
-#---------------------------------------------------------------------------------
-# Libraries
-#---------------------------------------------------------------------------------
-
 LIBDIRS := $(PORTLIBS) $(LIBNX)
 
-#---------------------------------------------------------------------------------
-# Build system
-#---------------------------------------------------------------------------------
+export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+	$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+	-I$(CURDIR)/$(BUILD)
+
+export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+
+ifeq ($(strip $(NO_NACP)),)
+export NROFLAGS += --nacp=$(CURDIR)/$(TARGET).nacp
+endif
+
+ifneq ($(APP_TITLEID),)
+export NACPFLAGS += --titleid=$(APP_TITLEID)
+endif
+
+ifneq ($(APP_TITLE),)
+export NACPFLAGS += --name="$(APP_TITLE)"
+endif
+
+ifneq ($(APP_AUTHOR),)
+export NACPFLAGS += --author="$(APP_AUTHOR)"
+endif
+
+ifneq ($(APP_VERSION),)
+export NACPFLAGS += --version="$(APP_VERSION)"
+endif
 
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 
@@ -60,7 +68,7 @@ export OUTPUT := $(CURDIR)/$(TARGET)
 export TOPDIR := $(CURDIR)
 
 export VPATH := $(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-                $(foreach dir,$(DATA),$(CURDIR)/$(dir))
+	$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR := $(CURDIR)/$(BUILD)
 
@@ -77,24 +85,14 @@ endif
 
 export OFILES_BIN := $(addsuffix .o,$(BINFILES))
 export OFILES_SRC := $(CPPFILES:.cpp=.o) \
-                     $(CFILES:.c=.o) \
-                     $(SFILES:.s=.o)
+	$(CFILES:.c=.o) \
+	$(SFILES:.s=.o)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SRC)
 
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
 
-export INCLUDE := $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-                  $(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-                  -I$(CURDIR)/$(BUILD)
-
-export LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
 .PHONY: all clean
-
-#---------------------------------------------------------------------------------
-# Main target
-#---------------------------------------------------------------------------------
 
 all: $(BUILD)
 
@@ -102,22 +100,13 @@ $(BUILD):
 	@mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-#---------------------------------------------------------------------------------
-# Clean
-#---------------------------------------------------------------------------------
-
 clean:
-	@echo "Cleaning..."
-	@rm -rf $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
+	@echo clean ...
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nro $(TARGET).nacp
 
-#---------------------------------------------------------------------------------
 else
 
 DEPENDS := $(OFILES:.o=.d)
-
-#---------------------------------------------------------------------------------
-# Link
-#---------------------------------------------------------------------------------
 
 $(OUTPUT).nro: $(OUTPUT).elf
 
@@ -125,15 +114,10 @@ $(OUTPUT).elf: $(OFILES)
 
 $(OFILES_SRC): $(HFILES)
 
-#---------------------------------------------------------------------------------
-# Binary files
-#---------------------------------------------------------------------------------
-
 %_bin.h %_bin.o: %.bin
 	@echo $(notdir $<)
 	@$(bin2o)
 
 -include $(DEPENDS)
 
-#---------------------------------------------------------------------------------
 endif
