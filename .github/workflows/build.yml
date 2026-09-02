@@ -1,16 +1,15 @@
 name: Build WebVideoCasterNX
 
 on:
-ame: Build WebVideoCasterNX
-
-on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     container:
       image: devkitpro/devkita64:latest
 
@@ -34,3 +33,4 @@ jobs:
             WebVideoCasterNX.nro
             WebVideoCasterNX.nacp
           if-no-files-found: error
+
