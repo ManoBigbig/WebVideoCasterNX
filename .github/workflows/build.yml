@@ -1,4 +1,4 @@
-name: Build WebVideoCasterNX
+ame: Build WebVideoCasterNX
 
 on:
   workflow_dispatch:
@@ -19,11 +19,26 @@ jobs:
 
       - name: Install Switch development packages
         run: |
-          dkp-pacman -Syu --noconfirm
+          dkp-pacman -Sy --noconfirm
           dkp-pacman -S --needed --noconfirm switch-dev
+
+      - name: Show toolchain
+        run: |
+          echo "DEVKITPRO=$DEVKITPRO"
+          echo "DEVKITA64=$DEVKITA64"
+          which aarch64-none-elf-g++
+          aarch64-none-elf-g++ --version
+
+      - name: Clean
+        run: make clean || true
 
       - name: Build NRO
         run: make -j2
+
+      - name: List build files
+        run: |
+          ls -lah
+          find . -maxdepth 2 -type f \( -name "*.nro" -o -name "*.nacp" -o -name "*.elf" \) -print
 
       - name: Upload NRO
         uses: actions/upload-artifact@v4
@@ -33,4 +48,3 @@ jobs:
             WebVideoCasterNX.nro
             WebVideoCasterNX.nacp
           if-no-files-found: error
-
